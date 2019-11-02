@@ -10,35 +10,41 @@ import Foundation
 import Alamofire
 
 /// A protocol that defines the Items API Manager behavior
-protocol ItemsApiProtocol {
+protocol ItemsAPIProtocol {
     /// Function that retrieves the Item list
     /// - parameters:
     ///     - completionHandler: A completion block used to send the completion result
-    func fetchItems(completionHandler: @escaping ApiCompletionHandler<[Item]>)
+    func fetchItems(completionHandler: @escaping APICompletionHandler<[Item]>)
 }
 
-final class ItemsApiManager: ApiManager, PhotosApiProtocol {
-    func fetchItems(completionHandler: @escaping ApiCompletionHandler<[Item]>) {
-        guard let url = URL(string: "http://www.splashbase.co/api/v1/images/latest") else {
+final class ItemsAPIManager: ItemsAPIProtocol {
+    private let requestProvider: APIRequestProvider
+    
+    init(requestProvider: APIRequestProvider) {
+        self.requestProvider = requestProvider
+    }
+    
+    func fetchItems(completionHandler: @escaping APICompletionHandler<[Item]>) {
+        guard let url = URL(string: "http://private-f0eea-mobilegllatam.apiary-mock.com/list") else {
             fatalError("Invalid URL")
         }
         // Create the request object
-        let request = createRequest(withURL: url, httpMethod: .get)
-        // Call the service
+        let request = requestProvider.createRequest(withURL: url, httpMethod: .get)
+        // Call the service using Alamofire
         Alamofire.request(request).validate().responseJSON { response in
-            guard let json = response.result.value as? [String: Any] else {
-                completionHandler(.error("Found empty response"))
+            guard let data = response.data else {
+                completionHandler(.error("Found empty response data"))
                 return
             }
             
-            let photosData: [[String: Any]] = json.array(forKey: "images")
-            let userResponse: [Photo] = photosData.compactMap { data in
-                let id = data.int(forKey: "id")
-                let url = data.string(forKey: "url")
-                let largeUrl = data.string(forKey: "large_url")
-                return Photo(id: id, url: url, largeUrl: largeUrl)
+            let decoder: JSONDecoder = JSONDecoder()
+            do {
+                let itemsData: [Item] = try decoder.decode([Item].self, from: data)
+                completionHandler(.success(itemsData))
             }
-            completionHandler(.success(userResponse))
+            catch {
+                completionHandler(.error("Unable to parse the data from the response"))
+            }
         }
     }
 }

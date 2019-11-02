@@ -9,14 +9,14 @@
 import Foundation
 import Alamofire
 
-public enum ApiResult <T> {
+public enum APIResult <T> {
     case success(T)
     case error(String)
 }
 
-typealias ApiCompletionHandler<T> = ((ApiResult<T>) -> Void)
+typealias APICompletionHandler<T> = ((APIResult<T>) -> Void)
 
-class ApiManager {
+final class APIRequestProvider {
     func createRequest(withURL url: URL, httpMethod: HTTPMethod, andParams params: [String: Any]? = nil) -> URLRequest {
         // Create the request with the url
         var request: URLRequest = URLRequest(url: url)

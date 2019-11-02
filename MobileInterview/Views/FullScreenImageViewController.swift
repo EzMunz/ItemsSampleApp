@@ -2,29 +2,37 @@
 //  FullScreenImageViewController.swift
 //  MobileInterview
 //
-//  Created by Ezequiel Facundo Munz on 02/11/2019.
+//  Created by Ezequiel Facundo Munz on 01/11/2019.
 //  Copyright © 2019 Ezequiel Munz. All rights reserved.
 //
 
 import UIKit
 
 class FullScreenImageViewController: UIViewController {
-
+    @IBOutlet weak var imageView: UIImageView!
+    
+    private var imageURL: String = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(FullScreenImageViewController.didTapCloseButton))
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        imageView.download(from: imageURL, contentMode: .scaleAspectFill, completionHandler: nil)
+    }
+    
+    public func loadImage(withURL urlString: String) {
+        imageURL = urlString
     }
 
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    // MARK: - PRIVATE
+    
+    @objc func didTapCloseButton() {
+        self.dismiss(animated: true, completion: nil)
     }
-    */
-
 }
